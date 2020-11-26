@@ -3,11 +3,13 @@ package logx
 import (
 	"context"
 	"github.com/sirupsen/logrus"
+	"io"
 )
 
 type Logger interface {
 	// TODO not use logrus
 	SetLevel(level logrus.Level)
+	SetOutput(out io.Writer)
 	Tracef(ctx context.Context, format string, args ...interface{})
 	Debugf(ctx context.Context, format string, args ...interface{})
 	Infof(ctx context.Context, format string, args ...interface{})

@@ -3,18 +3,19 @@ package logx
 import (
 	"context"
 	"github.com/sirupsen/logrus"
+	"io"
 	"os"
 )
 
 var (
-	gDefaultLogger = NewDefaultLogger()
+	defaultLogger = NewDefaultLogger()
 )
 
 // NewDefaultLogger
 func NewDefaultLogger() Logger {
 	formatter := newJSONFormatter()
 
-	l := &logrus.Logger{
+	log := &logrus.Logger{
 		Out:          os.Stderr,
 		Formatter:    formatter,
 		Hooks:        make(LevelHooks),
@@ -22,91 +23,95 @@ func NewDefaultLogger() Logger {
 		ExitFunc:     os.Exit,
 		ReportCaller: false,
 	}
-	l1 := &DefaultLogger{l}
-	SetGLogger(l1)
-	return l1
+	logger := &DefaultLogger{log: log}
+	SetLogger(logger)
+	return logger
 }
 
 func StandardLogger() Logger {
-	return gDefaultLogger
+	return defaultLogger
 }
 
 type DefaultLogger struct {
-	l1 *logrus.Logger
+	log *logrus.Logger
 }
 
 func (cl *DefaultLogger) SetLevel(level logrus.Level) {
-	cl.l1.SetLevel(level)
+	cl.log.SetLevel(level)
+}
+
+func (cl *DefaultLogger) SetOutput(out io.Writer) {
+	cl.log.SetOutput(out)
 }
 
 func (cl *DefaultLogger) Tracef(ctx context.Context, format string, args ...interface{}) {
-	cl.l1.WithContext(ctx).Tracef(format, args...)
+	cl.log.WithContext(ctx).Tracef(format, args...)
 }
 
 func (cl *DefaultLogger) Debugf(ctx context.Context, format string, args ...interface{}) {
-	cl.l1.WithContext(ctx).Debugf(format, args...)
+	cl.log.WithContext(ctx).Debugf(format, args...)
 }
 
 func (cl *DefaultLogger) Infof(ctx context.Context, format string, args ...interface{}) {
-	cl.l1.WithContext(ctx).Infof(format, args...)
+	cl.log.WithContext(ctx).Infof(format, args...)
 }
 
 func (cl *DefaultLogger) Printf(ctx context.Context, format string, args ...interface{}) {
-	cl.l1.WithContext(ctx).Printf(format, args...)
+	cl.log.WithContext(ctx).Printf(format, args...)
 }
 
 func (cl *DefaultLogger) Warnf(ctx context.Context, format string, args ...interface{}) {
-	cl.l1.WithContext(ctx).Warnf(format, args...)
+	cl.log.WithContext(ctx).Warnf(format, args...)
 }
 
 func (cl *DefaultLogger) Warningf(ctx context.Context, format string, args ...interface{}) {
-	cl.l1.WithContext(ctx).Warningf(format, args...)
+	cl.log.WithContext(ctx).Warningf(format, args...)
 }
 
 func (cl *DefaultLogger) Errorf(ctx context.Context, format string, args ...interface{}) {
-	cl.l1.WithContext(ctx).Errorf(format, args...)
+	cl.log.WithContext(ctx).Errorf(format, args...)
 }
 
 func (cl *DefaultLogger) Fatalf(ctx context.Context, format string, args ...interface{}) {
-	cl.l1.WithContext(ctx).Fatalf(format, args...)
+	cl.log.WithContext(ctx).Fatalf(format, args...)
 }
 
 func (cl *DefaultLogger) Panicf(ctx context.Context, format string, args ...interface{}) {
-	cl.l1.WithContext(ctx).Panicf(format, args...)
+	cl.log.WithContext(ctx).Panicf(format, args...)
 }
 
 func (cl *DefaultLogger) Trace(ctx context.Context, args ...interface{}) {
-	cl.l1.WithContext(ctx).Trace(args...)
+	cl.log.WithContext(ctx).Trace(args...)
 }
 
 func (cl *DefaultLogger) Debug(ctx context.Context, args ...interface{}) {
-	cl.l1.WithContext(ctx).Debug(args...)
+	cl.log.WithContext(ctx).Debug(args...)
 }
 
 func (cl *DefaultLogger) Info(ctx context.Context, args ...interface{}) {
-	cl.l1.WithContext(ctx).Info(args...)
+	cl.log.WithContext(ctx).Info(args...)
 }
 
 func (cl *DefaultLogger) Print(ctx context.Context, args ...interface{}) {
-	cl.l1.WithContext(ctx).Print(args...)
+	cl.log.WithContext(ctx).Print(args...)
 }
 
 func (cl *DefaultLogger) Warn(ctx context.Context, args ...interface{}) {
-	cl.l1.WithContext(ctx).Warn(args...)
+	cl.log.WithContext(ctx).Warn(args...)
 }
 
 func (cl *DefaultLogger) Warning(ctx context.Context, args ...interface{}) {
-	cl.l1.WithContext(ctx).Warning(args...)
+	cl.log.WithContext(ctx).Warning(args...)
 }
 
 func (cl *DefaultLogger) Error(ctx context.Context, args ...interface{}) {
-	cl.l1.WithContext(ctx).Error(args...)
+	cl.log.WithContext(ctx).Error(args...)
 }
 
 func (cl *DefaultLogger) Fatal(ctx context.Context, args ...interface{}) {
-	cl.l1.WithContext(ctx).Fatal(args...)
+	cl.log.WithContext(ctx).Fatal(args...)
 }
 
 func (cl *DefaultLogger) Panic(ctx context.Context, args ...interface{}) {
-	cl.l1.WithContext(ctx).Panic(args...)
+	cl.log.WithContext(ctx).Panic(args...)
 }
