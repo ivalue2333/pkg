@@ -1,27 +1,10 @@
 package logx
 
-import "context"
-
-type Logger interface {
-	Tracef(ctx context.Context, format string, args ...interface{})
-	Debugf(ctx context.Context, format string, args ...interface{})
-	Infof(ctx context.Context, format string, args ...interface{})
-	Printf(ctx context.Context, format string, args ...interface{})
-	Warnf(ctx context.Context, format string, args ...interface{})
-	Warningf(ctx context.Context, format string, args ...interface{})
-	Errorf(ctx context.Context, format string, args ...interface{})
-	Fatalf(ctx context.Context, format string, args ...interface{})
-	Panicf(ctx context.Context, format string, args ...interface{})
-	Trace(ctx context.Context, args ...interface{})
-	Debug(ctx context.Context, args ...interface{})
-	Info(ctx context.Context, args ...interface{})
-	Print(ctx context.Context, args ...interface{})
-	Warn(ctx context.Context, args ...interface{})
-	Warning(ctx context.Context, args ...interface{})
-	Error(ctx context.Context, args ...interface{})
-	Fatal(ctx context.Context, args ...interface{})
-	Panic(ctx context.Context, args ...interface{})
-}
+import (
+	"context"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+)
 
 var gLogger Logger
 
@@ -31,6 +14,30 @@ func SetGLogger(l1 Logger) {
 
 func GetGLogger() Logger {
 	return gLogger
+}
+
+func NewLogger(opts ...Option) (l Logger, err error) {
+	return NewLoggerWithOptions(newOptions(opts...))
+}
+
+func NewLoggerWithOptions(options Options) (l Logger, err error) {
+	l = NewDefaultLogger()
+	if err = initLoggerWithOptions(l, options); err != nil {
+		return nil, errors.Wrap(err, "failed to initialize logger")
+	}
+	return l, nil
+}
+
+func initLoggerWithOptions(l Logger, options Options) (err error) {
+	// 如果配置里指定了日志等级，则解析并设置，否则默认等级是info。
+	if options.Level != "" {
+		level, err := ParseLevel(options.Level)
+		if err != nil {
+			return errors.Wrapf(err, "failed to parse level(%s)", options.Level)
+		}
+		l.SetLevel(level)
+	}
+	return
 }
 
 func Tracef(ctx context.Context, format string, args ...interface{}) {
@@ -103,4 +110,8 @@ func Panic(ctx context.Context, args ...interface{}) {
 
 func Fatal(ctx context.Context, args ...interface{}) {
 	gLogger.Fatal(ctx, args...)
+}
+
+func ParseLevel(level string) (Level, error) {
+	return logrus.ParseLevel(level)
 }

@@ -35,6 +35,10 @@ type DefaultLogger struct {
 	l1 *logrus.Logger
 }
 
+func (cl *DefaultLogger) SetLevel(level logrus.Level) {
+	cl.l1.SetLevel(level)
+}
+
 func (cl *DefaultLogger) Tracef(ctx context.Context, format string, args ...interface{}) {
 	cl.l1.WithContext(ctx).Tracef(format, args...)
 }
