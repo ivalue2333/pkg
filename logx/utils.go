@@ -6,8 +6,6 @@ import (
 	"os"
 )
 
-
-
 func ParseLevel(level string) (Level, error) {
 	return logrus.ParseLevel(level)
 }
