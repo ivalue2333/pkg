@@ -3,6 +3,7 @@ package logx
 import (
 	"context"
 	"github.com/pkg/errors"
+	"os"
 )
 
 var logger Logger
@@ -80,6 +81,7 @@ func Panicf(ctx context.Context, format string, args ...interface{}) {
 
 func Fatalf(ctx context.Context, format string, args ...interface{}) {
 	logger.Fatalf(ctx, format, args...)
+	os.Exit(1)
 }
 
 func Trace(ctx context.Context, args ...interface{}) {
@@ -116,4 +118,5 @@ func Panic(ctx context.Context, args ...interface{}) {
 
 func Fatal(ctx context.Context, args ...interface{}) {
 	logger.Fatal(ctx, args...)
+	os.Exit(1)
 }
