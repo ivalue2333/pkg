@@ -2,7 +2,7 @@ package runner
 
 import (
 	"context"
-	"github.com/ivalue2333/pkg/logx"
+	"github.com/ivalue2333/pkg/src/logx"
 	"os"
 	"os/signal"
 	"sync"

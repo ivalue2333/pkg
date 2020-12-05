@@ -8,9 +8,7 @@ type Options struct {
 	Level    string `mapstructure:"level" json:"level" toml:"level"`
 	File     string `mapstructure:"file" json:"file" toml:"file"`
 	ErrFile  string `mapstructure:"err_file" json:"err_file" toml:"err_file"`
-	AppName  string `mapstructure:"app_name" json:"app_name" toml:"app_name"`
 	Format   string `mapstructure:"format" json:"format" toml:"format"`
-	AutoInit bool   `mapstructure:"auto_init" json:"auto_init" toml:"auto_init"`
 }
 
 func newOptions(opts ...Option) Options {

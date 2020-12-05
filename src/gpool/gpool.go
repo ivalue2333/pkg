@@ -2,7 +2,7 @@ package gpool
 
 import (
 	"context"
-	"github.com/ivalue2333/pkg/logx"
+	"github.com/ivalue2333/pkg/src/logx"
 	"runtime/debug"
 	"sync"
 	"time"
