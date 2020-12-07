@@ -19,7 +19,7 @@ func NewDefaultLogger() Logger {
 		Out:          os.Stderr,
 		Formatter:    formatter,
 		Hooks:        make(LevelHooks),
-		Level:        InfoLevel,
+		Level:        DebugLevel,
 		ExitFunc:     os.Exit,
 		ReportCaller: false,
 	}
