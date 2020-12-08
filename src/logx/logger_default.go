@@ -28,7 +28,7 @@ func NewDefaultLogger() Logger {
 	return logger
 }
 
-func StandardLogger() Logger {
+func GetDefaultLogger() Logger {
 	return defaultLogger
 }
 

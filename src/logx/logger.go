@@ -12,7 +12,7 @@ func SetLogger(l1 Logger) {
 	logger = l1
 }
 
-func GetLogger() Logger {
+func StandardLogger() Logger {
 	return logger
 }
 
