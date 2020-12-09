@@ -1,4 +1,4 @@
-package routes
+package httpxroute
 
 import (
 	"errors"
@@ -6,18 +6,18 @@ import (
 )
 
 var (
-	ErrMustValid         = errors.New("method must be valid")
-	ErrMustFunc          = errors.New("method must be func")
+	ErrMustValid = errors.New("method must be valid")
+	ErrMustFunc  = errors.New("method must be func")
 
 	ErrMustHasTwoParam = errors.New("method must has two param")
-	ErrMustHasTwoOut        = errors.New("method must has two out")
+	ErrMustHasTwoOut   = errors.New("method must has two out")
 
 	ErrMustPtr           = errors.New("param must be ptr")
 	ErrMustPointToStruct = errors.New("param must point to struct")
 
-	ErrMustError         = errors.New("method ret must be error")
+	ErrMustError = errors.New("method ret must be error")
 
-	replyErrorType   = reflect.TypeOf((*error)(nil)).Elem()
+	replyErrorType = reflect.TypeOf((*error)(nil)).Elem()
 )
 
 func CheckMethod(method interface{}) (mV reflect.Value, reqT, respT reflect.Type, err error) {
@@ -60,7 +60,7 @@ func CheckMethod(method interface{}) (mV reflect.Value, reqT, respT reflect.Type
 		err = ErrMustPtr
 		return
 	}
-	if respT.Elem().Kind() != reflect.Struct || respT.Elem().Kind() != reflect.Interface {
+	if !(respT.Elem().Kind() == reflect.Struct || respT.Elem().Kind() == reflect.Interface) {
 		err = ErrMustPointToStruct
 		return
 	}
