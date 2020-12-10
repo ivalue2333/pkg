@@ -23,8 +23,11 @@ func NewDefaultLogger() Logger {
 		ExitFunc:     os.Exit,
 		ReportCaller: false,
 	}
+	log.AddHook(NewFileLineHook())
+
 	logger := &DefaultLogger{log: log}
 	SetLogger(logger)
+
 	return logger
 }
 
@@ -42,6 +45,10 @@ func (cl *DefaultLogger) SetLevel(level logrus.Level) {
 
 func (cl *DefaultLogger) SetOutput(out io.Writer) {
 	cl.log.SetOutput(out)
+}
+
+func (cl DefaultLogger) AddHook(hook logrus.Hook) {
+	cl.log.AddHook(hook)
 }
 
 func (cl *DefaultLogger) Tracef(ctx context.Context, format string, args ...interface{}) {

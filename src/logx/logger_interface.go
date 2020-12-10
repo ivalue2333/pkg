@@ -10,6 +10,7 @@ type Logger interface {
 	// TODO not use logrus
 	SetLevel(level logrus.Level)
 	SetOutput(out io.Writer)
+	AddHook(hook logrus.Hook)
 	Tracef(ctx context.Context, format string, args ...interface{})
 	Debugf(ctx context.Context, format string, args ...interface{})
 	Infof(ctx context.Context, format string, args ...interface{})
