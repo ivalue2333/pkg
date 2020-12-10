@@ -20,14 +20,12 @@ var (
 	}
 )
 
-func WithDefault(options *Options)  {
-	if options.Name == "" {
-		options.Name = defaultOptions.Name
+func newOptions(opts ...Option) Options {
+	options := defaultOptions
+	for _, opt := range opts {
+		opt(&options)
 	}
-	if options.Address == "" {
-		options.Address = defaultOptions.Address
-	}
-	options.Middles = append(options.Middles, defaultOptions.Middles...)
+	return options
 }
 
 func WithName(name string) Option {

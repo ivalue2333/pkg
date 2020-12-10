@@ -23,14 +23,8 @@ type server struct {
 	options Options
 }
 
-func NewServer(options Options, opts ...Option) Server {
-	// set default
-	WithDefault(&options)
-
-	for _, opt := range opts {
-		opt(&options)
-	}
-	return NewServerWithOptions(options)
+func NewServer(opts ...Option) Server {
+	return NewServerWithOptions( newOptions(opts...))
 }
 
 func NewServerWithOptions(options Options) Server {
