@@ -141,6 +141,7 @@ func (c cacheNode) doTake(ctx context.Context, v interface{}, key string,
 			if err == errPlaceholder {
 				return nil, c.errNotFound
 			} else if err != redis.ErrNil {
+				// this is because redis is in bad status
 				// why we just return the error instead of query from db,
 				// because we don't allow the disaster pass to the dbs.
 				// fail fast, in case we bring down the dbs.
