@@ -11,7 +11,6 @@ type (
 	HandlerOption func(o *HandlerOptions)
 )
 
-
 func NewHandlerOptions() *HandlerOptions {
 	return &HandlerOptions{}
 }

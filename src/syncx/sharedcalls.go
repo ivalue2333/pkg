@@ -2,6 +2,7 @@ package syncx
 
 import "sync"
 
+// it refer to https://github.com/golang/groupcache/blob/master/singleflight/singleflight.go
 type (
 	// SharedCalls lets the concurrent calls with the same key to share the call result.
 	// For example, A called F, before it's done, B called F. Then B would not execute F,

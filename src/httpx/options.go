@@ -14,9 +14,9 @@ type (
 
 var (
 	defaultOptions = Options{
-		Name: "defaultHttpServer",
+		Name:    "defaultHttpServer",
 		Address: ":8080",
-		Middles : []middles.Middle{middles.Recovery()},
+		Middles: []middles.Middle{middles.Recovery()},
 	}
 )
 

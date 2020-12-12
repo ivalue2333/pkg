@@ -32,7 +32,7 @@ func (r *runner) RunTasks(ctx context.Context) error {
 		close(quit)
 	}()
 	go func() {
-		<-quit;
+		<-quit
 		cancel()
 	}()
 

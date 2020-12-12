@@ -58,7 +58,7 @@ func (s *sub) Start(ctx context.Context, handler pubsub.MessageHandler) (err err
 	}
 }
 
-func (s *sub)omitErr(err error) bool {
+func (s *sub) omitErr(err error) bool {
 	return err == redis.ErrNil
 }
 
@@ -66,7 +66,7 @@ func (s *sub) Pull(topic string, handler pubsub.MessageHandler) error {
 
 	data, err := s.pullOnce(topic)
 
-	if err != nil && ! s.omitErr(err){
+	if err != nil && !s.omitErr(err) {
 		return err
 	}
 

@@ -14,14 +14,14 @@ var (
 	topic = "topic_goods"
 	pool  = redisx.CreatePool(os.Getenv("REDIS_URI"))
 	pubc  = redislist.NewPublisher(pool, topic)
-	subc = redislist.NewSubscriber(pool, topic)
-	ctx = context.Background()
+	subc  = redislist.NewSubscriber(pool, topic)
+	ctx   = context.Background()
 )
 
 func init() {
 }
 
-func main()  {
+func main() {
 	datas1 := []string{"msg1", "msg2", "msg3", "msg4"}
 
 	go func() {

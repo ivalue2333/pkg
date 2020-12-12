@@ -20,7 +20,6 @@ const InfoLevel = logrus.InfoLevel
 const DebugLevel = logrus.DebugLevel
 const TraceLevel = logrus.TraceLevel
 
-
 var (
 	AllLevels = logrus.AllLevels
 )

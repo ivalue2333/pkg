@@ -55,5 +55,3 @@ func WithPassword(password string) Option {
 		opt.Password = password
 	}
 }
-
-

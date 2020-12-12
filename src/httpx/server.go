@@ -24,7 +24,7 @@ type server struct {
 }
 
 func NewServer(opts ...Option) Server {
-	return NewServerWithOptions( newOptions(opts...))
+	return NewServerWithOptions(newOptions(opts...))
 }
 
 func NewServerWithOptions(options Options) Server {

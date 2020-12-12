@@ -26,7 +26,7 @@ func newOptions(opts ...Option) Options {
 	return options
 }
 
-type  Option func(*Options)
+type Option func(*Options)
 
 func WithAddress(address string) Option {
 	return func(options *Options) {
