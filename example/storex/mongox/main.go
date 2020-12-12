@@ -19,6 +19,7 @@ type Template struct {
 	Name       string             `bson:"name" json:"name"`
 	Day        int                `json:"day" bson:"day"`
 	Date       *time.Time         `json:"date" bson:"date"`
+	TagList    []string           `json:"tag_list" bson:"tag_list"`
 	CreateTime time.Time          `json:"create_time" bson:"create_time"`
 }
 
@@ -74,6 +75,15 @@ func queryMany() {
 	// 使用 1, -1 來实现 顺序排序和倒序排序
 	opts.Sort = primitive.M{"num": -1}
 	err := model.Find(ctx, primitive.M{}, &res, opts)
+	fmt.Println(res)
+	fmt.Println(err)
+}
+
+func queryManyList() {
+	stdout.PrintFunc("queryManyList")
+
+	res := make([]Template, 0)
+	err := model.Find(ctx, primitive.M{}, &res)
 	fmt.Println(res)
 	fmt.Println(err)
 }
@@ -206,7 +216,6 @@ func shardingFind() {
 	}
 	fmt.Println("t2", *t2)
 }
-
 
 func main() {
 	//insert(3, 3)
