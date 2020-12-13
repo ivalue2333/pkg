@@ -9,22 +9,22 @@ import (
 )
 
 type (
-	Model struct {
+	Client struct {
 		WrappedClient  *mongoc_wrapped.WrappedClient
 		dbName         string
 		collectionName string
 	}
 )
 
-func MustNewModel(ctx context.Context, uri, dbName, collectionName string) *Model {
-	model, err := NewModel(ctx, uri, dbName, collectionName)
+func MustNewClient(ctx context.Context, uri, dbName, collectionName string) *Client {
+	client, err := NewClient(ctx, uri, dbName, collectionName)
 	if err != nil {
-		logx.Fatalf(context.Background(), "NewModel failed: err:%+v", err)
+		logx.Fatalf(context.Background(), "NewClient failed: err:%+v", err)
 	}
-	return model
+	return client
 }
 
-func NewModel(ctx context.Context, uri, dbName, collectionName string) (*Model, error) {
+func NewClient(ctx context.Context, uri, dbName, collectionName string) (*Client, error) {
 	c, err := mongoc_wrapped.NewClient(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
 		return nil, err
@@ -38,30 +38,30 @@ func NewModel(ctx context.Context, uri, dbName, collectionName string) (*Model, 
 		return nil, err
 	}
 
-	return &Model{
+	return &Client{
 		WrappedClient:  c,
 		dbName:         dbName,
 		collectionName: collectionName,
 	}, nil
 }
 
-func (b *Model) DatabaseName() string {
+func (b *Client) DatabaseName() string {
 	return b.dbName
 }
 
-func (b *Model) CollectionName() string {
+func (b *Client) CollectionName() string {
 	return b.collectionName
 }
 
-func (b *Model) Client(ctx context.Context) *mongoc_wrapped.WrappedClient {
+func (b *Client) Client(ctx context.Context) *mongoc_wrapped.WrappedClient {
 	return b.WrappedClient
 }
 
-func (b *Model) collection(ctx context.Context) *mongo.Collection {
+func (b *Client) collection(ctx context.Context) *mongo.Collection {
 	return b.Client(ctx).Database(b.DatabaseName()).Collection(b.CollectionName()).Collection()
 }
 
-func (b *Model) Aggregate(
+func (b *Client) Aggregate(
 	ctx context.Context,
 	pipeline, results interface{},
 	opts ...*options.AggregateOptions,
@@ -74,31 +74,31 @@ func (b *Model) Aggregate(
 	return err
 }
 
-func (b *Model) BulkWrite(
+func (b *Client) BulkWrite(
 	ctx context.Context,
-	models []mongo.WriteModel,
+	clients []mongo.WriteModel,
 	opts ...*options.BulkWriteOptions,
 ) (*mongo.BulkWriteResult, error) {
 
-	bwres, err := b.collection(ctx).BulkWrite(ctx, models, opts...)
+	bwres, err := b.collection(ctx).BulkWrite(ctx, clients, opts...)
 
 	return bwres, err
 }
 
-func (b *Model) Count(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error) {
+func (b *Client) Count(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error) {
 	count, err := b.collection(ctx).CountDocuments(ctx, filter, opts...)
 
 	return count, err
 }
 
-func (b *Model) CountDocuments(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error) {
+func (b *Client) CountDocuments(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error) {
 
 	count, err := b.collection(ctx).CountDocuments(ctx, filter, opts...)
 
 	return count, err
 }
 
-func (b *Model) DeleteMany(
+func (b *Client) DeleteMany(
 	ctx context.Context,
 	filter interface{},
 	opts ...*options.DeleteOptions,
@@ -109,7 +109,7 @@ func (b *Model) DeleteMany(
 	return dmres, err
 }
 
-func (b *Model) DeleteOne(
+func (b *Client) DeleteOne(
 	ctx context.Context,
 	filter interface{},
 	opts ...*options.DeleteOptions,
@@ -120,7 +120,7 @@ func (b *Model) DeleteOne(
 	return dor, err
 }
 
-func (b *Model) Distinct(
+func (b *Client) Distinct(
 	ctx context.Context,
 	fieldName string,
 	filter interface{},
@@ -132,14 +132,14 @@ func (b *Model) Distinct(
 	return distinct, err
 }
 
-func (b *Model) Drop(ctx context.Context) error {
+func (b *Client) Drop(ctx context.Context) error {
 
 	err := b.collection(ctx).Drop(ctx)
 
 	return err
 }
 
-func (b *Model) EstimatedDocumentCount(
+func (b *Client) EstimatedDocumentCount(
 	ctx context.Context,
 	opts ...*options.EstimatedDocumentCountOptions,
 ) (int64, error) {
@@ -149,7 +149,7 @@ func (b *Model) EstimatedDocumentCount(
 	return count, err
 }
 
-func (b *Model) Find(ctx context.Context, filter interface{}, results interface{}, opts ...*options.FindOptions) error {
+func (b *Client) Find(ctx context.Context, filter interface{}, results interface{}, opts ...*options.FindOptions) error {
 
 	cur, err := b.collection(ctx).Find(ctx, filter, opts...)
 	if err == nil {
@@ -159,7 +159,7 @@ func (b *Model) Find(ctx context.Context, filter interface{}, results interface{
 	return err
 }
 
-func (b *Model) FindOne(
+func (b *Client) FindOne(
 	ctx context.Context,
 	filter interface{}, result interface{},
 	opts ...*options.FindOneOptions,
@@ -168,7 +168,7 @@ func (b *Model) FindOne(
 	return b.collection(ctx).FindOne(ctx, filter, opts...).Decode(result)
 }
 
-func (b *Model) FindOneAndDelete(
+func (b *Client) FindOneAndDelete(
 	ctx context.Context,
 	filter interface{}, result interface{},
 	opts ...*options.FindOneAndDeleteOptions,
@@ -177,7 +177,7 @@ func (b *Model) FindOneAndDelete(
 	return b.collection(ctx).FindOneAndDelete(ctx, filter, opts...).Decode(result)
 }
 
-func (b *Model) FindOneAndReplace(
+func (b *Client) FindOneAndReplace(
 	ctx context.Context,
 	filter, replacement, result interface{},
 	opts ...*options.FindOneAndReplaceOptions,
@@ -186,7 +186,7 @@ func (b *Model) FindOneAndReplace(
 	return b.collection(ctx).FindOneAndReplace(ctx, filter, replacement, opts...).Decode(result)
 }
 
-func (b *Model) FindOneAndUpdate(
+func (b *Client) FindOneAndUpdate(
 	ctx context.Context,
 	filter, update, result interface{},
 	opts ...*options.FindOneAndUpdateOptions,
@@ -195,7 +195,7 @@ func (b *Model) FindOneAndUpdate(
 	return b.collection(ctx).FindOneAndUpdate(ctx, filter, update, opts...).Decode(result)
 }
 
-func (b *Model) FindOneAndUpsert(
+func (b *Client) FindOneAndUpsert(
 	ctx context.Context,
 	filter, update, result interface{},
 	opts ...*options.FindOneAndUpdateOptions,
@@ -208,9 +208,9 @@ func (b *Model) FindOneAndUpsert(
 	return b.collection(ctx).FindOneAndUpdate(ctx, filter, update, opts...).Decode(result)
 }
 
-func (b *Model) Indexes() mongo.IndexView { return b.collection(context.Background()).Indexes() }
+func (b *Client) Indexes() mongo.IndexView { return b.collection(context.Background()).Indexes() }
 
-func (b *Model) InsertMany(
+func (b *Client) InsertMany(
 	ctx context.Context,
 	documents []interface{},
 	opts ...*options.InsertManyOptions,
@@ -221,7 +221,7 @@ func (b *Model) InsertMany(
 	return insmres, err
 }
 
-func (b *Model) InsertOne(
+func (b *Client) InsertOne(
 	ctx context.Context,
 	document interface{},
 	opts ...*options.InsertOneOptions,
@@ -232,7 +232,7 @@ func (b *Model) InsertOne(
 	return insores, err
 }
 
-func (b *Model) ReplaceOne(
+func (b *Client) ReplaceOne(
 	ctx context.Context,
 	filter, replacement interface{},
 	opts ...*options.ReplaceOptions,
@@ -243,14 +243,14 @@ func (b *Model) ReplaceOne(
 	return repres, err
 }
 
-func (b *Model) UpdateMany(ctx context.Context, filter, replacement interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (b *Client) UpdateMany(ctx context.Context, filter, replacement interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 
 	umres, err := b.collection(ctx).UpdateMany(ctx, filter, replacement, opts...)
 
 	return umres, err
 }
 
-func (b *Model) UpdateOne(
+func (b *Client) UpdateOne(
 	ctx context.Context,
 	filter, replacement interface{},
 	opts ...*options.UpdateOptions,
@@ -261,7 +261,7 @@ func (b *Model) UpdateOne(
 	return uores, err
 }
 
-func (b *Model) Upsert(
+func (b *Client) Upsert(
 	ctx context.Context,
 	filter, replacement interface{},
 	opts ...*options.UpdateOptions,

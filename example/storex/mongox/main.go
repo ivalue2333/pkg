@@ -24,14 +24,18 @@ type Template struct {
 }
 
 var (
-	model *mongox.Model
+	model *mongox.Client
 	ctx   = context.Background()
 )
 
 func init() {
 	url := os.Getenv("MONGO_URI")
+	if url == "" {
+		url = "mongodb://127.0.0.1:37017/"
+	}
+	fmt.Println("url:", url)
 	ctx := context.Background()
-	model = mongox.MustNewModel(ctx, url, "mydb", "mytable")
+	model = mongox.MustNewClient(ctx, url, "mydb", "mytable")
 }
 
 func insert(n int, day int) {
@@ -220,12 +224,12 @@ func shardingFind() {
 func main() {
 	//insert(3, 3)
 	//queryOne()
-	//queryMany()
+	queryMany()
 	//aggregate()
 	//upsertBad()
 	//upsertGood()
 	//updateOne()
-	deleteMany()
+	//deleteMany()
 	//shardingInsert()
 	//shardingFind()
 }
