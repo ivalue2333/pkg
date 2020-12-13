@@ -38,7 +38,7 @@ func TestWorker_RunPanic2(t *testing.T) {
 	data := 50
 	ctx := context.TODO()
 	go worker.Run(ctx)
-	for i := 0; i < data; i ++ {
+	for i := 0; i < data; i++ {
 		worker.Input(ctx, i)
 	}
 

@@ -5,10 +5,10 @@ type Config struct {
 }
 
 type Options struct {
-	Level    string `mapstructure:"level" json:"level" toml:"level"`
-	File     string `mapstructure:"file" json:"file" toml:"file"`
-	ErrFile  string `mapstructure:"err_file" json:"err_file" toml:"err_file"`
-	Format   string `mapstructure:"format" json:"format" toml:"format"`
+	Level   string `mapstructure:"level" json:"level" toml:"level"`
+	File    string `mapstructure:"file" json:"file" toml:"file"`
+	ErrFile string `mapstructure:"err_file" json:"err_file" toml:"err_file"`
+	Format  string `mapstructure:"format" json:"format" toml:"format"`
 }
 
 func newOptions(opts ...Option) Options {

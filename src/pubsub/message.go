@@ -24,4 +24,3 @@ type Message struct {
 	// traceId
 	TraceId string
 }
-

@@ -4,9 +4,8 @@ type (
 	RedisType int
 )
 
-
 const (
-	RedisTypeNode RedisType = 1
+	RedisTypeNode    RedisType = 1
 	RedisTypeCluster RedisType = 2
 )
 

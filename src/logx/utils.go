@@ -18,4 +18,3 @@ func HandleFileOutput(l Logger, fileName string) error {
 	l.SetOutput(writer) // 设置正常日志
 	return nil
 }
-

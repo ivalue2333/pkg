@@ -64,7 +64,7 @@ func TestItemSet_AddSlice(t *testing.T) {
 		t.Errorf("wrong count, expected 5 and got %d", set.Size())
 	}
 
-	if ! set.Has("item3") || ! set.Has("item4") {
+	if !set.Has("item3") || !set.Has("item4") {
 		t.Error("failed")
 	}
 }

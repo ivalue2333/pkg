@@ -38,7 +38,7 @@ type (
 	}
 )
 
-func get()  {
+func get() {
 	cachec := cachex.NewCache(redisc, ErrMock)
 	data := &Data{}
 	var err error
@@ -49,7 +49,7 @@ func get()  {
 	fmt.Println(data)
 }
 
-func take()  {
+func take() {
 	cachec := cachex.NewCache(redisc, ErrMock)
 	data := &Data{}
 	var err error

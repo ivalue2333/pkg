@@ -15,7 +15,7 @@ const (
 )
 
 type (
-	Option func(w *Worker)
+	Option    func(w *Worker)
 	ProcessFn func(data interface{})
 )
 
@@ -73,7 +73,7 @@ func NewWorkerWithOptions(process ProcessFn, options Options, opts2 ...Option) *
 
 	opts = append(opts, opts2...)
 
-	return NewWorker(process, opts..., )
+	return NewWorker(process, opts...)
 }
 
 func NewWorker(process ProcessFn, opts ...Option) *Worker {

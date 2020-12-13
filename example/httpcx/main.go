@@ -84,7 +84,7 @@ func Post() {
 	}
 
 	r := new(resp)
-	req := &PostReq{Name:"percy", Age: 17}
+	req := &PostReq{Name: "percy", Age: 17}
 	err = client.PostJSON(ctx, "/post", req, nil, 3, r)
 	if err != nil {
 		fmt.Println(err)

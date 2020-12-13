@@ -51,25 +51,23 @@ func TestAdd(t *testing.T) {
 	}
 }
 
-
 func TestItemSet_AddSlice(t *testing.T) {
 	set := populateSet(3, 0)
 	if size := set.Size(); size != 3 {
 		t.Errorf("wrong count, expected 3 and got %d", size)
 	}
 
-	items := []Item{"item2","item3", "item4"}
+	items := []Item{"item2", "item3", "item4"}
 	set.AddSlice(items)
 
 	if set.Size() != 5 {
 		t.Errorf("wrong count, expected 5 and got %d", set.Size())
 	}
 
-	if ! set.Has("item3") || ! set.Has("item4") {
+	if !set.Has("item3") || !set.Has("item4") {
 		t.Error("failed")
 	}
 }
-
 
 func TestClear(t *testing.T) {
 	set := populateSet(3, 0)
