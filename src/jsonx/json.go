@@ -17,6 +17,11 @@ func MarshalUnsafe(v interface{}) []byte {
 	return data
 }
 
+func MarshalUnsafeString(v interface{}) string {
+	data := MarshalUnsafe(v)
+	return string(data)
+}
+
 func Unmarshal(data []byte, v interface{}) error {
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	if err := unmarshalUseNumber(decoder, v); err != nil {

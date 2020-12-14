@@ -8,10 +8,28 @@ import (
 	"io"
 )
 
-type Model interface {
-	IndexName(ctx context.Context) string
-	TypeName() string
-}
+type (
+	Model interface {
+		IndexName(ctx context.Context) string
+		TypeName() string
+	}
+
+	Base struct {
+		client *elastic.Client
+		clientName string
+		index      string
+		table      string
+	}
+
+	QueryParam struct {
+		PageNo   int
+		PageSize int
+		Sort     string
+		RouteId  string
+		Asc      bool
+		Select   []string
+	}
+)
 
 func NewBaseModel(clientName, index, table string) *Base {
 	client := _clientsMgr.Get(clientName).Client()
@@ -31,14 +49,6 @@ func NewBaseModelV7(clientName, index string) *Base {
 		index:      index,
 		client:     client,
 	}
-}
-
-type Base struct {
-	client *elastic.Client
-
-	clientName string
-	index      string
-	table      string
 }
 
 func (b *Base) Client() *elastic.Client {
@@ -78,21 +88,96 @@ func (b *Base) DeleteService() *elastic.DeleteService {
 	return b.client.Delete().Index(b.index)
 }
 
+func (b *Base) InsertBodyJSON(ctx context.Context, id, routeID string, body interface{}) (err error) {
+	ss := b.CreateService().Index(b.IndexName(ctx))
+	if id != "" {
+		ss = ss.Id(id)
+	}
+	if routeID != "" {
+		ss = ss.Routing(routeID)
+	}
 
-// id是es自动产生的id
-func (b *Base) Delete(ctx context.Context, id string) error {
+	_, err = ss.BodyJson(body).Do(ctx)
 
-	_, err := b.DeleteService().Index(b.IndexName(ctx)).Id(id).Refresh("true").Do(ctx)
 	return err
 }
 
-type QueryParam struct {
-	PageNo   int
-	PageSize int
-	Sort     string
-	RouteId  string
-	Asc      bool
-	Select   []string
+// Insert documents是一个json字符串，ES场景下，插入doc后，一般无需立即更新，这里不返回ID
+func (b *Base) Insert(ctx context.Context, id, documents string) error {
+	ss := b.CreateService().Index(b.IndexName(ctx))
+	if id != "" {
+		ss = ss.Id(id)
+	}
+	_, err := ss.BodyString(documents).Do(ctx)
+	return err
+}
+
+func (b *Base) InsertWithRouting(ctx context.Context, id, routeid, documents string) error {
+	_, err := b.CreateService().Index(b.IndexName(ctx)).Id(id).Routing(routeid).BodyString(documents).Do(ctx)
+	return err
+}
+
+func (b *Base) Get(ctx context.Context, id, routeID string, result interface{}) (err error) {
+	getSvc := b.GetService().Index(b.IndexName(ctx)).Id(id)
+	if routeID != "" {
+		getSvc = getSvc.Routing(routeID)
+	}
+
+	var re *elastic.GetResult
+	re, err = getSvc.Do(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(re.Source, result)
+
+	return err
+}
+
+func (b *Base) Update(ctx context.Context, id string, replacement map[string]interface{}) error {
+	_, err := b.UpdateService().Index(b.IndexName(ctx)).Id(id).Doc(replacement).Do(ctx)
+	return err
+}
+
+func (b *Base) UpdateWithRouting(ctx context.Context, id, routeid string, replacement map[string]interface{}) error {
+	_, err := b.UpdateService().Index(b.IndexName(ctx)).Id(id).Routing(routeid).Doc(replacement).Do(ctx)
+	return err
+}
+
+func (b *Base) Upsert(ctx context.Context, id string, doc interface{}) error {
+	_, err := b.UpdateService().Index(b.IndexName(ctx)).Id(id).Doc(doc).DocAsUpsert(true).Refresh("true").Do(ctx)
+	return err
+}
+
+func (b *Base) UpsertWithRouting(ctx context.Context, id, routeid string, doc interface{}) error {
+	_, err := b.UpdateService().Index(b.IndexName(ctx)).Id(id).Routing(routeid).Doc(doc).DocAsUpsert(true).Refresh("true").Do(ctx)
+	return err
+}
+
+func (b *Base) BatchUpsert(ctx context.Context, values []interface{}, idFunc func(i int) string) (err error) {
+
+	if len(values) == 0 {
+		return nil
+	}
+
+	bulkRequest := b.Client().Bulk()
+
+	for idx := range values {
+		docID := idFunc(idx)
+		indexReq := elastic.NewBulkIndexRequest().Index(b.IndexName(ctx)).Id(docID).Doc(values[idx])
+		bulkRequest = bulkRequest.Add(indexReq)
+	}
+
+	_, err = bulkRequest.Do(ctx)
+
+	return err
+}
+
+
+// id是es自动产生的id
+func (b *Base) Delete(ctx context.Context, id string) error {
+	_, err := b.DeleteService().Index(b.IndexName(ctx)).Id(id).Refresh("true").Do(ctx)
+	return err
 }
 
 func (b *Base) FindWithForeach(ctx context.Context, query elastic.Query, p *QueryParam, fn func(h *elastic.SearchHit)) (int64, error) {
@@ -388,89 +473,4 @@ func (b *Base) Scroll(ctx context.Context, keepAlive string, source []string, qu
 
 func (b *Base) CloseScroll(ctx context.Context) error {
 	return b.ScrollService().Index(b.IndexName(ctx)).Clear(ctx)
-}
-
-func (b *Base) InsertBodyJSON(ctx context.Context, id, routeID string, body interface{}) (err error) {
-	ss := b.CreateService().Index(b.IndexName(ctx))
-	if id != "" {
-		ss = ss.Id(id)
-	}
-	if routeID != "" {
-		ss = ss.Routing(routeID)
-	}
-
-	_, err = ss.BodyJson(body).Do(ctx)
-
-	return err
-}
-
-// Insert documents是一个json字符串，ES场景下，插入doc后，一般无需立即更新，这里不返回ID
-func (b *Base) Insert(ctx context.Context, id, documents string) error {
-	ss := b.CreateService().Index(b.IndexName(ctx))
-	if id != "" {
-		ss = ss.Id(id)
-	}
-	_, err := ss.BodyString(documents).Do(ctx)
-	return err
-}
-
-func (b *Base) InsertWithRouting(ctx context.Context, id, routeid, documents string) error {
-	_, err := b.CreateService().Index(b.IndexName(ctx)).Id(id).Routing(routeid).BodyString(documents).Do(ctx)
-	return err
-}
-
-func (b *Base) Update(ctx context.Context, id string, replacement map[string]interface{}) error {
-	_, err := b.UpdateService().Index(b.IndexName(ctx)).Id(id).Doc(replacement).Do(ctx)
-	return err
-}
-
-func (b *Base) UpdateWithRouting(ctx context.Context, id, routeid string, replacement map[string]interface{}) error {
-	_, err := b.UpdateService().Index(b.IndexName(ctx)).Id(id).Routing(routeid).Doc(replacement).Do(ctx)
-	return err
-}
-
-func (b *Base) Upsert(ctx context.Context, id string, doc interface{}) error {
-	_, err := b.UpdateService().Index(b.IndexName(ctx)).Id(id).Doc(doc).DocAsUpsert(true).Refresh("true").Do(ctx)
-	return err
-}
-
-func (b *Base) UpsertWithRouting(ctx context.Context, id, routeid string, doc interface{}) error {
-	_, err := b.UpdateService().Index(b.IndexName(ctx)).Id(id).Routing(routeid).Doc(doc).DocAsUpsert(true).Refresh("true").Do(ctx)
-	return err
-}
-
-func (b *Base) Get(ctx context.Context, id, routeID string, result interface{}) (err error) {
-	getSvc := b.GetService().Index(b.IndexName(ctx)).Id(id)
-	if routeID != "" {
-		getSvc = getSvc.Routing(routeID)
-	}
-
-	var re *elastic.GetResult
-	re, err = getSvc.Do(ctx)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(re.Source, result)
-
-	return err
-}
-
-func (b *Base) BatchUpsert(ctx context.Context, values []interface{}, idFunc func(i int) string) (err error) {
-
-	if len(values) == 0 {
-		return nil
-	}
-
-	bulkRequest := b.Client().Bulk()
-
-	for idx := range values {
-		docID := idFunc(idx)
-		indexReq := elastic.NewBulkIndexRequest().Index(b.IndexName(ctx)).Id(docID).Doc(values[idx])
-		bulkRequest = bulkRequest.Add(indexReq)
-	}
-
-	_, err = bulkRequest.Do(ctx)
-
-	return err
 }
