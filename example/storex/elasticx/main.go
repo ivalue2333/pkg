@@ -9,11 +9,13 @@ import (
 	"github.com/ivalue2333/pkg/src/stringx"
 	"github.com/olivere/elastic/v7"
 	"math/rand"
+	"time"
 )
 
 var (
 	ctx        = context.Background()
 	clientName = "myclient"
+	indexName  = "myindex"
 	model      *elasticx.Base
 )
 
@@ -22,7 +24,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	model = elasticx.NewBaseModelV7(clientName, "myindex")
+	model = elasticx.NewBaseModelV7(clientName, indexName)
 }
 
 type Data struct {
@@ -30,19 +32,21 @@ type Data struct {
 	Age         int    `json:"age"`
 	School      string `json:"school"`
 	Father      string `json:"father"`
+	Email       string `json:"email"`
 	Random      string `json:"random"`
 	HasChildren bool   `json:"has_children"`
+	Article     string `json:"article"`
 }
 
 func (d *Data) key() string {
 	return d.Name
 }
 
-var NAME_DEFAULT = []string{"percy", "alice", "bob", "tom"}
+var NAME_DEFAULT = []string{"percy", "alice", "bob", "percy1", "alice1", "bob1"}
 var SCHOOL_LIST = []string{"swjtu", "bd", "qinghua", "chuanda", "chengduda", "shifangda"}
 
 func mock() {
-	length := rand.Intn(100) + 100
+	length := 100
 	for i := 0; i < length; i++ {
 		for _, name := range NAME_DEFAULT {
 			for _, school := range SCHOOL_LIST {
@@ -54,6 +58,43 @@ func mock() {
 			}
 		}
 	}
+}
+
+func deleteIndex() {
+	stdout.PrintFunc("deleteIndex")
+	res, err := model.Client().DeleteIndex(indexName).Do(ctx)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(res)
+}
+
+func indexSettings() {
+	stdout.PrintFunc("indexSettings")
+	settings := `{"mappings": {"properties": {"email": {"type": "keyword"}, "name": {"type": "text"}, "age": {"type": "integer"}}}}`
+	res, err := model.Client().CreateIndex(indexName).Body(settings).Do(ctx)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(res)
+}
+
+func indexGet() {
+	stdout.PrintFunc("indexGet")
+	res, err := model.Client().IndexGet(indexName).Do(ctx)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(jsonx.MarshalUnsafeString(res[indexName]))
+}
+
+func indexGetSettings() {
+	stdout.PrintFunc("indexGetSettings")
+	res, err := model.Client().IndexGetSettings(indexName).Do(ctx)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(jsonx.MarshalUnsafeString(res[indexName]))
 }
 
 func insert() {
@@ -110,7 +151,7 @@ func upsert() {
 	}
 }
 
-func delete() {
+func del() {
 	stdout.PrintFunc("delete")
 	err := model.Delete(ctx, NAME_DEFAULT[0])
 	if err != nil {
@@ -133,7 +174,7 @@ func search() {
 	//esParam.Sort = "name"
 	//esParam.Asc = true
 	esParam.PageNo = 0
-	esParam.PageSize = 20
+	esParam.PageSize = 2
 
 	var results []Data
 
@@ -155,12 +196,77 @@ func search() {
 	fmt.Println(results)
 }
 
+func scroll() {
+	stdout.PrintFunc("scroll")
+	boolQ := elastic.NewBoolQuery()
+	defer func() {
+		err := model.CloseScroll(ctx)
+		if err != nil {
+			fmt.Println("CloseScroll", err)
+		}
+	}()
+	var results []Data
+	total, scrollId, err := model.Scroll(ctx, "1m", []string{"name"}, boolQ, map[string]interface{}{"size": 5}, &results)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(total, len(results), results)
+	fmt.Println(scrollId)
+}
+
+func scrollAll() {
+	stdout.PrintFunc("scrollAll")
+	defer func() {
+		err := model.CloseScroll(ctx)
+		fmt.Println("CloseScroll done")
+		if err != nil {
+			fmt.Println("scrollAll", err)
+		}
+	}()
+	var results []Data
+	var scrollId string
+	for {
+		scrollId, datas := scrollAll_(scrollId)
+		fmt.Println(fmt.Sprintf("length(%d), scrollId(%s)", len(datas), scrollId))
+		results = append(results, datas...)
+		if scrollId == "" {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	fmt.Println("results:", len(results))
+}
+
+func scrollAll_(scrollId string) (newScrollId string, results []Data) {
+	boolQ := elastic.NewBoolQuery()
+	if scrollId != "" {
+		model.ScrollService().ScrollId(scrollId)
+	}
+	_, newScrollId, err := model.Scroll(ctx, "1m", []string{"name"}, boolQ, map[string]interface{}{"size": 100}, &results)
+	if err != nil {
+		//panic(err)
+	}
+	return newScrollId, results
+}
+
 func main() {
+
+	// index
+	//deleteIndex()
+	//indexSettings()
+	//indexGet()
+	//indexGetSettings()
+
+
+	//mock()
+
 	//insert()
 	//insertBodyJSON()
 	//get()
 	//update()
 	//upsert()
-	//delete()
-	search()
+	//del()
+	//search()
+	//scroll()
+	scrollAll()
 }
