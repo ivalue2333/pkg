@@ -1,4 +1,4 @@
-package gcache
+package syncx
 
 /*
 Copyright 2012 Google Inc.
