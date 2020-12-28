@@ -14,6 +14,9 @@ func Marshal(v interface{}) ([]byte, error) {
 
 func MarshalUnsafe(v interface{}) []byte {
 	data, _ := json.Marshal(v)
+	if data == nil {
+		data = []byte{}
+	}
 	return data
 }
 
