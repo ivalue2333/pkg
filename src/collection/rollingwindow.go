@@ -1,6 +1,7 @@
 package collection
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -69,6 +70,10 @@ func (rw *RollingWindow) Reduce(fn func(b *Bucket)) {
 	if diff > 0 {
 		// 计算当前 offset 下标
 		offset := (rw.offset + span + 1) % rw.size
+
+		// span 这几个 bucket 就不参与计算，因为已经过期了： 为了实现这个效果， 需要计算新的 rw.offset 和总共的 bucket的个数, rw.size - span
+		fmt.Println("span", span, "last.offset", rw.offset, "cur.offset", offset, "count", diff)
+
 		rw.window.reduce(offset, diff, fn)
 	}
 }
@@ -89,14 +94,14 @@ func (rw *RollingWindow) updateOffset() {
 		return
 	}
 
-	offset := rw.offset
 	// reset expired buckets
 	for i := 0; i < span; i++ {
-		rw.window.resetBucket((offset + i + 1) % rw.size)
+		//fmt.Println("reset", (rw.offset+i+1)%rw.size, "old offset", rw.offset, span, (rw.offset + span) % rw.size)
+		rw.window.resetBucket((rw.offset + i + 1) % rw.size)
 	}
 
 	// 当前应该更新的 bucket 的下标 = 上次的下标 + 两次的间隔
-	rw.offset = (offset + span) % rw.size
+	rw.offset = (rw.offset + span) % rw.size
 	now := timex.Now()
 	// align to interval time boundary
 	rw.lastTime = now - (now-rw.lastTime)%rw.interval
@@ -146,6 +151,14 @@ func (w *window) reduce(start, count int, fn func(b *Bucket)) {
 
 func (w *window) resetBucket(offset int) {
 	w.buckets[offset%w.size].reset()
+}
+
+func (w *window) print() {
+	buckets := make([]Bucket, len(w.buckets))
+	for i, x := range w.buckets {
+		buckets[i] = *x
+	}
+	fmt.Println(buckets)
 }
 
 // IgnoreCurrentBucket lets the Reduce call ignore current bucket.

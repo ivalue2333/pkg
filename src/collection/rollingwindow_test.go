@@ -96,6 +96,9 @@ func TestRollingWindowReduce(t *testing.T) {
 					elapse()
 				}
 			}
+
+			r.window.print()
+
 			var result float64
 			r.Reduce(func(b *Bucket) {
 				result += b.Sum
@@ -104,6 +107,45 @@ func TestRollingWindowReduce(t *testing.T) {
 		})
 	}
 }
+
+
+func TestRollingWindowReduce2(t *testing.T) {
+	const size = 4
+	const count = 6
+	tests := []struct {
+		win    *RollingWindow
+		expect float64
+	}{
+		{
+			win:    NewRollingWindow(size, duration),
+			expect: 31,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(stringx.Rand(), func(t *testing.T) {
+			r := test.win
+			for x := 0; x < count; x++ {
+				for i := 0; i <= x; i++ {
+					r.Add(float64(i))
+				}
+				if x < count-1 {
+					elapse()
+				}
+			}
+
+			r.window.print()
+			elapse()
+
+			var result float64
+			r.Reduce(func(b *Bucket) {
+				result += b.Sum
+			})
+			assert.Equal(t, test.expect, result)
+		})
+	}
+}
+
 
 func TestRollingWindowBucketTimeBoundary(t *testing.T) {
 	const size = 3
