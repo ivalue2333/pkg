@@ -1,12 +1,14 @@
 package httpx
 
-import "github.com/ivalue2333/pkg/src/httpx/middles"
+import (
+	"github.com/ivalue2333/pkg/src/httpx/httpxmiddles"
+)
 
 type (
 	Options struct {
 		Name    string `mapstructure:"name" json:"name" toml:"name"`
 		Address string `mapstructure:"address" json:"address" toml:"address"`
-		Middles []middles.Middle
+		Middles []httpxmiddles.Middle
 	}
 
 	Option func(*Options)
@@ -16,7 +18,7 @@ var (
 	defaultOptions = Options{
 		Name:    "defaultHttpServer",
 		Address: ":8080",
-		Middles: []middles.Middle{middles.Recovery()},
+		Middles: []httpxmiddles.Middle{httpxmiddles.Recovery()},
 	}
 )
 
@@ -40,7 +42,7 @@ func WithAddress(address string) Option {
 	}
 }
 
-func WithMiddles(ms ...middles.Middle) Option {
+func WithMiddles(ms ...httpxmiddles.Middle) Option {
 	return func(options *Options) {
 		options.Middles = ms
 	}

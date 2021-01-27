@@ -63,7 +63,7 @@ func main() {
 	}
 
 	server := httpx.NewServer(httpx.WithName(options.Name), httpx.WithAddress(options.Address),
-		httpx.WithMiddles(middles.LoggingRequest(), middles.LoggingResponse()))
+		httpx.WithMiddles(httpxmiddles.LoggingRequest(), httpxmiddles.LoggingResponse()))
 
 	engine := server.GetKernel()
 

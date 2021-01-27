@@ -1,4 +1,4 @@
-package middles
+package httpxmiddles
 
 import "github.com/gin-gonic/gin"
 

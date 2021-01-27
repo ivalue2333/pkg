@@ -1,4 +1,4 @@
-package middles
+package httpxmiddles
 
 import (
 	"github.com/ivalue2333/pkg/src/logx"
